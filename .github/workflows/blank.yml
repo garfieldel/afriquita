@@ -23,8 +23,8 @@ jobs:
     # Paso 1: Generar los datos del juego (Equivalente a los scripts .bat)
     - name: Build Game Data Packages
       run: |
-        chmod +x Oxygen/sonic3air/_internal/mastering/mastering_linux.sh
-        ./Oxygen/sonic3air/_internal/mastering/mastering_linux.sh --data-only
+        chmod +x Oxygen/sonic3air/___internal/mastering/mastering_linux.shmastering_linux.sh
+        ./Oxygen/sonic3air/___internal/mastering/mastering_linux.sh --data-only
         
     # Paso 2: Copiar los assets generados a la carpeta de Android
     - name: Copy Assets to Android Project

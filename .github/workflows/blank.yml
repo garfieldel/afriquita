@@ -1,12 +1,5 @@
 name: Build Sonic 3 AIR Android APK
-
-on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-  workflow_dispatch: # Permite activar la compilación manualmente desde GitHub
-
+on: push
 jobs:
   build:
     runs-on: ubuntu-latest

@@ -5,9 +5,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@main
       - name: setup msbuild
-        uses: microsoft/setup-msbuild@v2
+        uses: microsoft/setup-msbuild@main
       - name: build external dependencies
         shell: cmd
         working-directory: framework/external
@@ -16,8 +16,12 @@ jobs:
         shell: cmd
         working-directory: Oxygen/sonic3air/build/_vstudio
         run: msbuild sonic3air.sln /p:Configuration=Release /p:Platform=x64 -verbosity:minimal
+      - name: Build Mastering
+        shell: cmd
+        working-directory: Oxygen/sonic3air/___internal/mastering
+        run: call mastering_windows_64bit.bat
       - name: upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@main
         with:
           name: s3a
           path: .

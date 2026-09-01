@@ -15,13 +15,15 @@ jobs:
         working-directory: framework/external
         run: call build_externals_windows.bat
 
-      # ESTA ACCIÓN INSTALA MESA OFICIALMENTE SIN ERRORES DE DESCARGA
       - name: Configurar Gráficos Virtuales (Mesa OpenGL)
         uses: ssciwr/setup-mesa-dist-win@v1
 
       - name: Build Mastering
         shell: cmd
         working-directory: Oxygen/sonic3air/___internal/mastering
+        # ENTORNO VIRTUAL DE AUDIO: Engaña a SDL2 para evitar el crash de sonido
+        env:
+          SDL_AUDIODRIVER: dummy
         run: |
           set msbuildPath=msbuild
           
@@ -29,7 +31,6 @@ jobs:
           msbuild ../../build/_vstudio/sonic3air.sln /property:Configuration=Release /property:Platform=x64 -verbosity:minimal
           
           echo === Inyectando controladores gráficos virtuales ===
-          :: Copiamos las DLLs oficiales que la acción ssciwr acaba de inyectar en el sistema
           copy "C:\Windows\System32\opengl32.dll" "..\..\bin\Release_x64\" /y
           
           echo === Procesando scripts .lemon y empaquetando ===
@@ -39,5 +40,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sonic3air_windows_build
-          path: Oxygen/
+          path: Oxygen/sonic3air/
           

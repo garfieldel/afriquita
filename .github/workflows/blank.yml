@@ -12,6 +12,15 @@ jobs:
         shell: cmd
         working-directory: framework/external
         run: call build_externals_windows.bat
+      - name: Configurar Gráficos Virtuales (Mesa OpenGL)
+        shell: cmd
+        working-directory: Oxygen/sonic3air/bin/Release_x64
+        run: |
+          mkdir Oxygen\sonic3air\bin\Release_x64 2>nul
+          curl -L "https://github.com" -o mesa.7z
+          tar -xf mesa.7z
+          copy x64\opengl32.dll .
+          copy x64\libglapi.dll .
       - name: Build Mastering
         shell: cmd
         working-directory: Oxygen/sonic3air/___internal/mastering

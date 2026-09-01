@@ -15,14 +15,9 @@ jobs:
         working-directory: framework/external
         run: call build_externals_windows.bat
 
-      # NUEVO PASO CORREGIDO: Descarga Mesa usando PowerShell para evitar errores de formato
+      # ESTA ACCIÓN INSTALA MESA OFICIALMENTE SIN ERRORES DE DESCARGA
       - name: Configurar Gráficos Virtuales (Mesa OpenGL)
-        shell: powershell
-        run: |
-          $url = "https://github.com"
-          Invoke-WebRequest -Uri $url -OutFile "mesa.7z"
-          # Extraemos el contenido usando 7-Zip que ya viene instalado en GitHub Actions
-          & "C:\Program Files\7-Zip\7z.exe" x mesa.7z -o"mesa_extracted"
+        uses: ssciwr/setup-mesa-dist-win@v1
 
       - name: Build Mastering
         shell: cmd
@@ -34,8 +29,8 @@ jobs:
           msbuild ../../build/_vstudio/sonic3air.sln /property:Configuration=Release /property:Platform=x64 -verbosity:minimal
           
           echo === Inyectando controladores gráficos virtuales ===
-          copy "..\..\..\..\mesa_extracted\x64\opengl32.dll" "..\..\bin\Release_x64\" /y
-          copy "..\..\..\..\mesa_extracted\x64\libglapi.dll" "..\..\bin\Release_x64\" /y
+          :: Copiamos las DLLs oficiales que la acción ssciwr acaba de inyectar en el sistema
+          copy "C:\Windows\System32\opengl32.dll" "..\..\bin\Release_x64\" /y
           
           echo === Procesando scripts .lemon y empaquetando ===
           call mastering_windows_64bit.bat
@@ -44,5 +39,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sonic3air_windows_build
-          path: Oxygen/sonic3air/___internal/_MASTER/
+          path: Oxygen/
           

@@ -30,11 +30,13 @@ jobs:
           echo === Inyectando controladores gráficos virtuales ===
           copy "C:\Windows\System32\opengl32.dll" "..\..\bin\Release_x64\" /y
           
-          echo === Forzando entorno de Audio Silencioso ===
+          echo === Forzando entorno de Audio Silencioso de forma absoluta ===
           set SDL_AUDIODRIVER=dummy
           
           echo === Procesando scripts .lemon y empaquetando ===
-          call mastering_windows_64bit.bat
+          :: Ejecutamos el archivo pasando la variable de manera explícita en la misma línea
+          set SDL_AUDIODRIVER=dummy&& call mastering_windows_64bit.bat
+
 
       - name: upload artifact
         uses: actions/upload-artifact@v4

@@ -5,28 +5,42 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: checkout
-        uses: actions/checkout@main
+        uses: actions/checkout@v4
+
       - name: setup msbuild
-        uses: microsoft/setup-msbuild@main
+        uses: microsoft/setup-msbuild@v2
+
       - name: build external dependencies
         shell: cmd
         working-directory: framework/external
         run: call build_externals_windows.bat
+
+      # NUEVO PASO CORREGIDO: Descarga Mesa en la carpeta raíz actual
       - name: Configurar Gráficos Virtuales (Mesa OpenGL)
         shell: cmd
-        working-directory: Oxygen/sonic3air/bin/Release_x64
         run: |
-          mkdir Oxygen\sonic3air\bin\Release_x64 2>nul
           curl -L "https://github.com" -o mesa.7z
           tar -xf mesa.7z
-          copy x64\opengl32.dll .
-          copy x64\libglapi.dll .
+          
       - name: Build Mastering
         shell: cmd
         working-directory: Oxygen/sonic3air/___internal/mastering
-        run: call mastering_windows_64bit.bat
+        # Pasamos las DLLs de gráficos justo después de que MSBuild compile el juego, antes de que se ejecute el .exe
+        run: |
+          set msbuildPath=msbuild
+          
+          echo === Compilando binarios iniciales ===
+          msbuild ../../build/_vstudio/sonic3air.sln /property:Configuration=Release /property:Platform=x64 -verbosity:minimal
+          
+          echo === Inyectando controladores gráficos virtuales ===
+          copy "..\..\..\..\x64\opengl32.dll" "..\..\bin\Release_x64\" /y
+          copy "..\..\..\..\x64\libglapi.dll" "..\..\bin\Release_x64\" /y
+          
+          echo === Procesando scripts .lemon y empaquetando ===
+          call mastering_windows_64bit.bat
+
       - name: upload artifact
-        uses: actions/upload-artifact@main
+        uses: actions/upload-artifact@v4
         with:
-          name: s3a
-          path: .
+          name: sonic3air_windows_build
+          path: Oxygen/sonic3air/___internal/_MASTER/

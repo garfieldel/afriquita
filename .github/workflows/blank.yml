@@ -18,6 +18,13 @@ jobs:
       - name: Configurar Gráficos Virtuales (Mesa OpenGL)
         uses: ssciwr/setup-mesa-dist-win@v1
 
+      # NUEVO PASO: Instala un dispositivo de audio virtual mediante Chocolatey
+      - name: Configurar Audio Virtual (Virtual Audio Cable)
+        shell: powershell
+        run: |
+          choco install virtual-audio-cable --no-progress -y
+
+      # Paso corregido inyectando el entorno completo
       - name: Build Mastering
         shell: cmd
         working-directory: Oxygen/sonic3air/___internal/mastering
@@ -30,17 +37,12 @@ jobs:
           echo === Inyectando controladores gráficos virtuales ===
           copy "C:\Windows\System32\opengl32.dll" "..\..\bin\Release_x64\" /y
           
-          echo === Forzando entorno de Audio Silencioso de forma absoluta ===
-          set SDL_AUDIODRIVER=dummy
-          
           echo === Procesando scripts .lemon y empaquetando ===
-          :: Ejecutamos el archivo pasando la variable de manera explícita en la misma línea
-          set SDL_AUDIODRIVER=dummy&& call mastering_windows_64bit.bat
-
+          call mastering_windows_64bit.bat
 
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: sonic3air_windows_build
-          path: Oxygen/
-          
+          path: Oxygen/sonic3air/___internal/_MASTER/
+    

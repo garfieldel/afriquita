@@ -15,17 +15,18 @@ jobs:
         working-directory: framework/external
         run: call build_externals_windows.bat
 
-      # NUEVO PASO CORREGIDO: Descarga Mesa en la carpeta raíz actual
+      # NUEVO PASO CORREGIDO: Descarga Mesa usando PowerShell para evitar errores de formato
       - name: Configurar Gráficos Virtuales (Mesa OpenGL)
-        shell: cmd
+        shell: powershell
         run: |
-          curl -L "https://github.com" -o mesa.7z
-          tar -xf mesa.7z
-          
+          $url = "https://github.com"
+          Invoke-WebRequest -Uri $url -OutFile "mesa.7z"
+          # Extraemos el contenido usando 7-Zip que ya viene instalado en GitHub Actions
+          & "C:\Program Files\7-Zip\7z.exe" x mesa.7z -o"mesa_extracted"
+
       - name: Build Mastering
         shell: cmd
         working-directory: Oxygen/sonic3air/___internal/mastering
-        # Pasamos las DLLs de gráficos justo después de que MSBuild compile el juego, antes de que se ejecute el .exe
         run: |
           set msbuildPath=msbuild
           
@@ -33,8 +34,8 @@ jobs:
           msbuild ../../build/_vstudio/sonic3air.sln /property:Configuration=Release /property:Platform=x64 -verbosity:minimal
           
           echo === Inyectando controladores gráficos virtuales ===
-          copy "..\..\..\..\x64\opengl32.dll" "..\..\bin\Release_x64\" /y
-          copy "..\..\..\..\x64\libglapi.dll" "..\..\bin\Release_x64\" /y
+          copy "..\..\..\..\mesa_extracted\x64\opengl32.dll" "..\..\bin\Release_x64\" /y
+          copy "..\..\..\..\mesa_extracted\x64\libglapi.dll" "..\..\bin\Release_x64\" /y
           
           echo === Procesando scripts .lemon y empaquetando ===
           call mastering_windows_64bit.bat
@@ -44,3 +45,4 @@ jobs:
         with:
           name: sonic3air_windows_build
           path: Oxygen/sonic3air/___internal/_MASTER/
+          
